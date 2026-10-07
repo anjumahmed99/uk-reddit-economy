@@ -1,0 +1,27 @@
+<!--VERDICTS-->
+<section class="verdicts">
+  <div class="verdict"><span class="eyebrow">Poverty model</span><span class="big">R² 0.75</span><span class="lbl">Hardship talk is well explained by unemployment, Bank Rate, GDP growth and wage growth (COVID months excluded).</span></div>
+  <div class="verdict"><span class="eyebrow">Strongest link</span><span class="big">+25 posts</span><span class="lbl">More hardship posts per 1,000 for each 1-point rise in unemployment (t = 6.2). Bank Rate also pushes it up (t = 3.7).</span></div>
+  <div class="verdict"><span class="eyebrow">Road to 100k model</span><span class="big">R² 0.53</span><span class="lbl">Weaker. Driven by Bank Rate and, unexpectedly, by slower wage growth. Not by GDP.</span></div>
+  <div class="verdict"><span class="eyebrow">GDP growth</span><span class="big">|r| &lt; 0.19</span><span class="lbl">Year-on-year changes in every Reddit measure are essentially unrelated to year-on-year changes in GDP growth.</span></div>
+</section>
+<section class="panel">
+  <div class="panel-head"><div class="eyebrow">Bottom line</div><h2>A mirror of household stress, not of GDP</h2></div>
+  <ul class="findings">
+    <li><b>Poverty model works reasonably well.</b> Hardship posts rise with unemployment (+24.9 per point, t 6.2) and Bank Rate (+5.1, t 3.7), and fall when GDP growth (−2.9, t −4.4) and wage growth (−5.3, t −2.4) are stronger. The signs are what you would expect.</li>
+    <li><b>Interest rates are the most robust signal.</b> On the stricter year-on-year test, Bank Rate is the only indicator that holds up strongly (r = +0.55 for hardship, +0.39 for six-figure posts). Unemployment and GDP drop out.</li>
+    <li><b>Reddit reacted to the squeeze late, not to the price shock.</b> Hardship talk was at its lowest in 2021–22 (about 55–60 per 1,000 posts) while inflation was spiking. It climbed through 2023–26 (to about 150) as rates stayed high and unemployment rose. That is why CPI comes out negative in the model.</li>
+    <li><b>The Road to 100k model is weaker and harder to read.</b> Six-figure talk rose with Bank Rate (t 3.5) and as wage growth slowed (t −3.3). One plausible reading: it reflects salary and tax-threshold worries more than booming prosperity. GDP is not significant.</li>
+    <li><b>No evidence that Reddit leads the official data.</b> In the timing test, hardship talk follows inflation by roughly a year rather than anticipating it, and neither measure moves before GDP.</li>
+    <li><b>The second-check subreddits mostly show their own growth.</b> r/DWPhelp (R² 0.82) and r/FIREUK (R² 0.52) fit well in levels, but on year-on-year changes no indicator correlates above 0.26. Their good fit mostly reflects both communities growing while rates and unemployment rose.</li>
+  </ul>
+</section>
+<!--CAVEATS-->
+<ul class="findings">
+  <li><b>Substitute subreddits.</b> r/PovertyUK and r/Roadto100kUK do not exist (closest is r/PovertyFinanceUK with 92 members). The measures here are keyword searches inside r/UKPersonalFinance plus r/DWPhelp and r/FIREUK, all UK-specific communities.</li>
+  <li><b>Normalisation.</b> Every index is posts per 1,000 r/UKPersonalFinance posts, which removes Reddit's own user growth. Total r/UKPersonalFinance posts fell from about 6,000 a month in early 2024 to about 3,400 in early 2026. That shrinking denominator inflates every index in 2025–26.</li>
+  <li><b>Keyword noise.</b> Words like "equity" and "bonus" also catch home equity and one-off bonuses. These are counts of posts, not sentiment.</li>
+  <li><b>One rate cycle.</b> Ten years contains essentially one tightening cycle (2022–23). The Bank Rate result rests heavily on it and could be coincidence with other 2023–26 trends.</li>
+  <li><b>Statistics.</b> OLS with Newey–West (HAC, 12-lag) standard errors. COVID (Mar 2020 – Jun 2021) is excluded from fitting, and including it drops the poverty R² from 0.75 to 0.56: the 2020 GDP collapse barely registered in hardship posts. Correlation is not causation.</li>
+  <li><b>Sources.</b> Reddit counts from the Arctic Shift archive (monthly aggregates, Jan 2016 – Aug 2026). ONS series ECY2 (monthly GDP index, YoY computed), D7G7 (CPI), MGSX (unemployment), KAC3 (AWE total pay growth). Bank of England IUMABEDR (Bank Rate, monthly average). Latest official data: GDP Jul 2026, CPI Aug 2026, unemployment Jun 2026.</li>
+</ul>

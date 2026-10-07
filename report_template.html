@@ -1,0 +1,266 @@
+<title>UK Reddit Economic Signal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column (research note) that widens for charts; each model is a self-contained panel. */
+:root {
+  --bg: #f4f6f8; --panel: #ffffff; --ink: #121820; --ink-2: #4a5563; --ink-3: #7b8594;
+  --rule: #dde2e8; --grid: #e9edf1; --accent: #1d4f91; --shade: rgba(120,130,145,.10);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --pos: #2a78d6; --neg: #e34948;
+  --good-bg: #e3f1ea; --good-fg: #17663f; --weak-bg: #eef0f3; --weak-fg: #5b6573;
+  --f-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11151a; --panel: #181d24; --ink: #eef1f5; --ink-2: #b4bcc7; --ink-3: #87909c;
+  --rule: #2a313b; --grid: #232a33; --accent: #8db8f0; --shade: rgba(160,170,185,.08);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --pos: #3987e5; --neg: #e66767;
+  --good-bg: #173326; --good-fg: #8fd6ad; --weak-bg: #232a33; --weak-fg: #a3acb8; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11151a; --panel: #181d24; --ink: #eef1f5; --ink-2: #b4bcc7; --ink-3: #87909c;
+  --rule: #2a313b; --grid: #232a33; --accent: #8db8f0; --shade: rgba(160,170,185,.08);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --pos: #3987e5; --neg: #e66767;
+  --good-bg: #173326; --good-fg: #8fd6ad; --weak-bg: #232a33; --weak-fg: #a3acb8; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--f-body); padding: 40px 20px 80px; margin: 0 }
+.wrap { max-width: 1000px; margin: 0 auto; display: grid; gap: 28px }
+.prose { max-width: 68ch }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.15 }
+h1 { font-size: clamp(30px, 5vw, 46px); font-weight: 800; letter-spacing: -.02em }
+h2 { font-size: 26px; font-weight: 700; letter-spacing: -.01em }
+h3 { font-size: 16px; font-weight: 700 }
+p { margin: 0 }
+.eyebrow { font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent) }
+.lede { font-size: 18px; color: var(--ink-2); margin-top: 14px }
+.meta { font: 12px/1.5 var(--f-mono); color: var(--ink-3); margin-top: 14px }
+code, .mono { font-family: var(--f-mono); font-size: .92em }
+.verdicts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px }
+.verdict { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 18px 20px; display: grid; gap: 8px; align-content: start }
+.verdict .big { font: 700 30px/1 var(--f-display); font-variant-numeric: tabular-nums }
+.verdict .lbl { font-size: 13px; color: var(--ink-2) }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 26px clamp(16px, 3vw, 30px); display: grid; gap: 22px; min-width: 0 }
+.panel-head { display: grid; gap: 8px }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; flex-wrap: wrap }
+.seg button { font: 500 13px var(--f-body); padding: 6px 12px; border: 0; background: transparent; color: var(--ink-2); cursor: pointer }
+.seg button + button { border-left: 1px solid var(--rule) }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel) }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px }
+.ctl-label { font: 500 11px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3) }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 26px }
+.grid2 > * { min-width: 0 }
+.chart { position: relative; width: 100% }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible }
+.chart text { font: 11px var(--f-mono); fill: var(--ink-3) }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--ink-2); margin-bottom: 6px }
+.legend span { display: inline-flex; align-items: center; gap: 6px }
+.legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block }
+.legend i.dash { background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 7px) !important; color: var(--ink-3) }
+.legend i.box { height: 10px; width: 14px; background: var(--shade); border: 1px solid var(--rule) }
+.tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; font: 12px/1.5 var(--f-mono); color: var(--ink); box-shadow: 0 4px 16px rgba(0,0,0,.12); white-space: nowrap; z-index: 2 }
+.tip b { font-weight: 500; color: var(--ink-2) }
+.tip .sw { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px }
+.cap { font-size: 13px; color: var(--ink-2); margin-top: 8px }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule) }
+th { font: 500 11px var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3) }
+td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right }
+th.num { text-align: right }
+.scroll { overflow-x: auto }
+.pill { display: inline-block; font: 500 11px var(--f-mono); padding: 2px 8px; border-radius: 99px; white-space: nowrap }
+.pill.sig { background: var(--good-bg); color: var(--good-fg) }
+.pill.ns { background: var(--weak-bg); color: var(--weak-fg) }
+.bars { display: grid; gap: 6px }
+.barrow { display: grid; grid-template-columns: 110px 1fr 54px; gap: 10px; align-items: center; font-size: 13px }
+.barrow .track { position: relative; height: 14px; background: linear-gradient(var(--rule), var(--rule)) center/1px 100% no-repeat }
+.barrow .fill { position: absolute; top: 2px; height: 10px; border-radius: 2px }
+.barrow .v { font: 12px var(--f-mono); text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2) }
+.stats { display: flex; flex-wrap: wrap; gap: 10px 28px }
+.stat { display: grid; gap: 2px }
+.stat .n { font: 700 22px var(--f-display); font-variant-numeric: tabular-nums }
+.stat .l { font-size: 12px; color: var(--ink-3) }
+ul.findings { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 72ch }
+.note { border-left: 3px solid var(--rule); padding: 2px 0 2px 14px; color: var(--ink-2); font-size: 14px; max-width: 72ch }
+details summary { cursor: pointer; font-weight: 600 }
+@media (max-width: 520px) { .barrow { grid-template-columns: 84px 1fr 46px } body { padding-inline: 16px } }
+</style>
+
+<div class="wrap">
+  <header class="prose">
+    <div class="eyebrow">UK macro · alternative data test · Jan 2016 – Aug 2026</div>
+    <h1 style="margin-top:12px">Does UK Reddit track the economy?</h1>
+    <p class="lede">Two models compare how often people on UK money subreddits post about financial hardship or about climbing toward a six-figure salary, against official GDP, inflation, interest-rate, unemployment and wage figures.</p>
+    <p class="meta">Reddit: Arctic Shift archive, monthly post counts · Economy: ONS (GDP, CPI, unemployment, AWE pay) and Bank of England (Bank Rate) · <a href="https://github.com/anjumahmed99/uk-reddit-economy" style="color:var(--accent)">Code and data on GitHub</a></p>
+  </header>
+
+  <!--VERDICTS-->
+
+  <section class="panel" id="poverty"></section>
+  <section class="panel" id="wealth"></section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div class="eyebrow">Timing test</div>
+      <h2>Does Reddit move before the data?</h2>
+      <p class="prose" style="color:var(--ink-2)">Correlation between each Reddit index this month and the indicator <i>k</i> months later. A peak to the right of zero means Reddit leads the official figure; to the left means it lags.</p>
+    </div>
+    <div class="controls">
+      <span class="ctl-label">Reddit index</span>
+      <div class="seg" id="ll-index"></div>
+    </div>
+    <div class="chart" id="ll-chart"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div class="eyebrow">Read before using</div>
+      <h2>Method and caveats</h2>
+    </div>
+    <!--CAVEATS-->
+    <details>
+      <summary>Monthly data table</summary>
+      <div class="scroll" id="table" style="margin-top:12px; max-height:420px"></div>
+    </details>
+  </section>
+</div>
+
+<script>
+const D = /*DATA*/;
+const LABEL = { cpi: "CPI inflation", bank_rate: "Bank Rate", unemp: "Unemployment", gdp_yoy: "GDP growth (YoY)", wages: "Wage growth" };
+const UNIT = { cpi: "%", bank_rate: "%", unemp: "%", gdp_yoy: "%", wages: "%" };
+const IDX = {
+  hardship: { name: "Hardship posts", long: "r/UKPersonalFinance posts mentioning debt, arrears, overdrafts, bailiffs, CCJs, IVAs, food banks, payday loans or being skint", unit: "per 1,000 UKPF posts" },
+  dwphelp: { name: "r/DWPhelp", long: "All posts in r/DWPhelp (UK benefits help; subreddit opened May 2019)", unit: "per 1,000 UKPF posts" },
+  aspiration: { name: "Six-figure posts", long: "r/UKPersonalFinance posts mentioning 100k, promotions, pay rises, bonuses, RSUs or equity", unit: "per 1,000 UKPF posts" },
+  fireuk: { name: "r/FIREUK", long: "All posts in r/FIREUK (UK financial independence / early retirement)", unit: "per 1,000 UKPF posts" },
+};
+const ECON = ["cpi", "bank_rate", "unemp", "gdp_yoy", "wages"];
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmtM = m => { const [y, mo] = m.split("-"); return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+mo - 1] + " " + y; };
+const el = (t, a = {}, h = "") => { const e = document.createElement(t); Object.entries(a).forEach(([k, v]) => e.setAttribute(k, v)); e.innerHTML = h; return e; };
+const z = arr => { const v = arr.filter(x => x != null); const m = v.reduce((a, b) => a + b, 0) / v.length; const s = Math.sqrt(v.reduce((a, b) => a + (b - m) ** 2, 0) / v.length); return arr.map(x => x == null ? null : (x - m) / s); };
+
+function seg(container, items, active, onPick) {
+  container.innerHTML = "";
+  items.forEach(([key, label]) => {
+    const b = el("button", { type: "button", "aria-pressed": key === active }, label);
+    b.onclick = () => { [...container.children].forEach(c => c.setAttribute("aria-pressed", c === b)); onPick(key); };
+    container.appendChild(b);
+  });
+}
+
+/* Line chart: series [{name, values, color, dash, fmt}], x labels; optional shaded band; crosshair tooltip. */
+function lineChart(host, { x, series, xFmt = v => v, shade, zeroLine, yFmt = v => v.toFixed(1), xTicks, height = 300 }) {
+  host.innerHTML = "";
+  const W = 640, H = height, m = { t: 10, r: 14, b: 26, l: 44 };
+  const all = series.flatMap(s => s.values).filter(v => v != null);
+  let lo = Math.min(...all), hi = Math.max(...all); if (zeroLine) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
+  const pad = (hi - lo) * .08 || 1; lo -= pad; hi += pad;
+  const sx = i => m.l + i / (x.length - 1) * (W - m.l - m.r), sy = v => m.t + (hi - v) / (hi - lo) * (H - m.t - m.b);
+  const step = (() => { const r = (hi - lo) / 5, p = 10 ** Math.floor(Math.log10(r)); return [1, 2, 2.5, 5, 10].map(k => k * p).find(k => k >= r); })();
+  let g = "";
+  if (shade) { const a = x.indexOf(shade[0]), b = x.indexOf(shade[1]); if (a >= 0 && b >= 0) g += `<rect x="${sx(a)}" y="${m.t}" width="${sx(b) - sx(a)}" height="${H - m.t - m.b}" fill="${css("--shade")}"/>`; }
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) g += `<line x1="${m.l}" x2="${W - m.r}" y1="${sy(v)}" y2="${sy(v)}" stroke="${Math.abs(v) < 1e-9 && zeroLine ? css("--ink-3") : css("--grid")}" stroke-width="1"/><text x="${m.l - 6}" y="${sy(v) + 4}" text-anchor="end">${yFmt(v)}</text>`;
+  (xTicks || x.map((_, i) => i)).forEach(i => g += `<text x="${sx(i)}" y="${H - 6}" text-anchor="middle">${xFmt(x[i], i)}</text>`);
+  series.forEach(s => {
+    let d = "", pen = false;
+    s.values.forEach((v, i) => { if (v == null) { pen = false; return; } d += (pen ? "L" : "M") + sx(i).toFixed(1) + " " + sy(v).toFixed(1); pen = true; });
+    g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" ${s.dash ? 'stroke-dasharray="5 4"' : ""}/>`;
+  });
+  g += `<line class="xh" y1="${m.t}" y2="${H - m.b}" stroke="${css("--ink-3")}" stroke-width="1" visibility="hidden"/><g class="dots"></g>`;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": series.map(s => s.name).join(", ") }, g);
+  host.appendChild(svg);
+  const tip = el("div", { class: "tip", hidden: "" }); host.appendChild(tip);
+  const xh = svg.querySelector(".xh"), dots = svg.querySelector(".dots");
+  svg.addEventListener("pointermove", e => {
+    const r = svg.getBoundingClientRect(), px = (e.clientX - r.left) / r.width * W;
+    const i = Math.max(0, Math.min(x.length - 1, Math.round((px - m.l) / (W - m.l - m.r) * (x.length - 1))));
+    xh.setAttribute("x1", sx(i)); xh.setAttribute("x2", sx(i)); xh.setAttribute("visibility", "visible");
+    dots.innerHTML = series.map(s => s.values[i] == null ? "" : `<circle cx="${sx(i)}" cy="${sy(s.values[i])}" r="4.5" fill="${s.color}" stroke="${css("--panel")}" stroke-width="2"/>`).join("");
+    tip.innerHTML = `<b>${xFmt(x[i], i, true)}</b><br>` + series.map(s => `<span class="sw" style="background:${s.color}"></span>${s.name}: ${s.values[i] == null ? "–" : (s.fmt || yFmt)(s.values[i])}`).join("<br>");
+    tip.hidden = false; const tx = sx(i) / W * r.width;
+    tip.style.left = Math.min(Math.max(tx + 12, 0), r.width - tip.offsetWidth) + "px"; tip.style.top = "8px";
+    if (tx + 12 + tip.offsetWidth > r.width) tip.style.left = Math.max(0, tx - 12 - tip.offsetWidth) + "px";
+  });
+  svg.addEventListener("pointerleave", () => { tip.hidden = true; xh.setAttribute("visibility", "hidden"); dots.innerHTML = ""; });
+}
+const yearTicks = months => months.map((m, i) => m.endsWith("-01") && +m.slice(0, 4) % 2 === 0 ? i : -1).filter(i => i >= 0);
+const legend = items => `<div class="legend">${items.map(([n, c, k]) => `<span><i class="${k || ""}" style="background:${c}"></i>${n}</span>`).join("")}</div>`;
+
+function corrBars(rows) {
+  return `<div class="bars">${rows.map(([lab, v]) => {
+    if (v == null) return "";
+    const w = Math.abs(v) * 50, left = v >= 0 ? 50 : 50 - w;
+    return `<div class="barrow"><span>${lab}</span><div class="track"><div class="fill" style="left:${left}%;width:${w}%;background:${v >= 0 ? css("--pos") : css("--neg")}"></div></div><span class="v">${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(2)}</span></div>`;
+  }).join("")}</div>`;
+}
+
+function renderModel(host, { eyebrow, title, blurb, keys }) {
+  host.innerHTML = `<div class="panel-head"><div class="eyebrow">${eyebrow}</div><h2>${title}</h2><p class="prose" style="color:var(--ink-2)">${blurb}</p></div>
+    <div class="controls"><span class="ctl-label">Reddit measure</span><div class="seg m-idx"></div></div>
+    <p class="m-desc cap" style="margin:0"></p>
+    <div class="stats m-stats"></div>
+    <div class="grid2">
+      <div><h3>Model fit: actual vs predicted</h3><div class="m-fit-leg"></div><div class="chart m-fit"></div><p class="cap">OLS on CPI, Bank Rate, unemployment, GDP growth and wage growth. The grey band (Mar 2020 – Jun 2021) is the COVID period, excluded from fitting.</p></div>
+      <div><h3>Reddit vs one indicator, standardised</h3>
+        <div class="controls" style="margin:6px 0 8px"><div class="seg m-ind"></div></div>
+        <div class="m-ov-leg"></div><div class="chart m-ov"></div><p class="cap">Both lines rescaled to z-scores (standard deviations from their own average) so they share one axis.</p></div>
+    </div>
+    <div class="grid2">
+      <div><h3>Regression coefficients</h3><div class="scroll m-coef"></div><p class="cap">t-statistics use Newey–West standard errors (12-month lag), which correct for the strong autocorrelation in monthly data. |t| ≥ 2 ≈ significant at 5%.</p></div>
+      <div><h3>Correlation with each indicator</h3>
+        <p class="cap" style="margin:4px 0 8px"><b>Levels</b>: raw monthly values</p><div class="m-cl"></div>
+        <p class="cap" style="margin:14px 0 8px"><b>Year-on-year changes</b>: stricter test that removes shared long-run trends</p><div class="m-cc"></div></div>
+    </div>`;
+  const q = s => host.querySelector(s);
+  let cur = keys[0], ind = "cpi";
+  const draw = () => {
+    const M = D.models[cur], meta = IDX[cur];
+    q(".m-desc").textContent = meta.long + ". Measured " + meta.unit + " to strip out Reddit's own growth.";
+    const o = M.ols, sig = o.coefs.filter(c => c.name !== "const" && Math.abs(c.t) >= 2).map(c => LABEL[c.name]);
+    q(".m-stats").innerHTML = [[o.r2.toFixed(2), "R² (excl. COVID)"], [M.ols_with_covid.r2.toFixed(2), "R² incl. COVID"], [o.n, "months fitted"], [sig.length + " of 5", "indicators significant"]]
+      .map(([n, l]) => `<div class="stat"><span class="n">${n}</span><span class="l">${l}</span></div>`).join("");
+    const fitted = D.months.map(m => { const j = M.fit_months.indexOf(m); return j < 0 ? null : o.fitted[j]; });
+    q(".m-fit-leg").innerHTML = legend([[meta.name + " (actual)", css("--s1")], ["Model prediction", css("--s3"), "dash"], ["COVID, excluded", "", "box"]]);
+    lineChart(q(".m-fit"), { x: D.months, xFmt: (m, i, full) => full ? fmtM(m) : m.slice(0, 4), xTicks: yearTicks(D.months), shade: ["2020-03", "2021-06"],
+      series: [{ name: "Actual", values: M.index, color: css("--s1") }, { name: "Predicted", values: fitted, color: css("--s3"), dash: true }] });
+    const drawOv = () => {
+      q(".m-ov-leg").innerHTML = legend([[meta.name, css("--s1")], [LABEL[ind], css("--s2")]]);
+      const ra = M.index, rb = D.econ[ind];
+      lineChart(q(".m-ov"), { x: D.months, xFmt: (m, i, full) => full ? fmtM(m) : m.slice(0, 4), xTicks: yearTicks(D.months), zeroLine: true, shade: ["2020-03", "2021-06"],
+        series: [{ name: meta.name, values: z(ra), color: css("--s1"), fmt: (v) => v.toFixed(2) + " sd" }, { name: LABEL[ind], values: z(rb), color: css("--s2"), fmt: v => v.toFixed(2) + " sd" }] });
+    };
+    seg(q(".m-ind"), ECON.map(k => [k, LABEL[k]]), ind, k => { ind = k; drawOv(); }); drawOv();
+    q(".m-coef").innerHTML = `<table><thead><tr><th>Indicator (1pp rise)</th><th class="num">Effect</th><th class="num">t</th><th></th></tr></thead><tbody>${o.coefs.filter(c => c.name !== "const").map(c =>
+      `<tr><td>${LABEL[c.name]}</td><td class="num">${c.b >= 0 ? "+" : "−"}${Math.abs(c.b).toFixed(2)}</td><td class="num">${c.t.toFixed(1)}</td><td><span class="pill ${Math.abs(c.t) >= 2 ? "sig" : "ns"}">${Math.abs(c.t) >= 2 ? "significant" : "not significant"}</span></td></tr>`).join("")}</tbody></table>`;
+    q(".m-cl").innerHTML = corrBars(ECON.map(k => [LABEL[k], M.corr_levels[k]]));
+    q(".m-cc").innerHTML = corrBars(ECON.map(k => [LABEL[k], M.corr_changes[k]]));
+  };
+  seg(q(".m-idx"), keys.filter(k => D.models[k]).map(k => [k, IDX[k].name]), cur, k => { cur = k; draw(); });
+  draw();
+}
+
+function renderAll() {
+  renderModel(document.getElementById("poverty"), { eyebrow: "Model A · Poverty", title: "Hardship talk vs the economy", blurb: "Stand-in for r/PovertyUK, which does not exist. Primary measure: hardship-keyword posts in r/UKPersonalFinance (1.6M members), with r/DWPhelp as a second check.", keys: ["hardship", "dwphelp"] });
+  renderModel(document.getElementById("wealth"), { eyebrow: "Model B · Road to 100k", title: "Six-figure ambition vs the economy", blurb: "Stand-in for r/Roadto100kUK, which does not exist. Primary measure: posts about 100k, promotions, pay rises and bonuses in r/UKPersonalFinance, with r/FIREUK as a second check.", keys: ["aspiration", "fireuk"] });
+  let li = "hardship";
+  const lags = Array.from({ length: 25 }, (_, i) => i - 12);
+  const drawLL = () => {
+    const L = D.models[li].leadlag, host = document.getElementById("ll-chart");
+    host.innerHTML = legend([["CPI inflation", css("--s1")], ["Unemployment", css("--s2")], ["GDP growth", css("--s3")]]);
+    const c = el("div", { class: "chart" }); host.appendChild(c);
+    lineChart(c, { x: lags, zeroLine: true, height: 260, yFmt: v => v.toFixed(1), xTicks: lags.map((_, i) => i).filter(i => i % 3 === 0),
+      xFmt: (k, i, full) => full ? (k === 0 ? "Same month" : k > 0 ? `Reddit leads by ${k} mo` : `Reddit lags by ${-k} mo`) : (k > 0 ? "+" + k : k),
+      series: [{ name: "CPI", values: L.cpi, color: css("--s1"), fmt: v => "r = " + v.toFixed(2) }, { name: "Unemployment", values: L.unemp, color: css("--s2"), fmt: v => "r = " + v.toFixed(2) }, { name: "GDP growth", values: L.gdp_yoy, color: css("--s3"), fmt: v => "r = " + v.toFixed(2) }] });
+  };
+  seg(document.getElementById("ll-index"), Object.keys(IDX).filter(k => D.models[k]).map(k => [k, IDX[k].name]), li, k => { li = k; drawLL(); });
+  drawLL();
+  const cols = [["hardship", "Hardship /1k"], ["dwphelp", "DWPhelp /1k"], ["aspiration", "6-fig /1k"], ["fireuk", "FIREUK /1k"]].filter(([k]) => D.models[k]);
+  document.getElementById("table").innerHTML = `<table><thead><tr><th>Month</th>${cols.map(c => `<th class="num">${c[1]}</th>`).join("")}${ECON.map(k => `<th class="num">${LABEL[k]}</th>`).join("")}</tr></thead><tbody>${D.months.map((m, i) =>
+    `<tr><td class="mono">${m}</td>${cols.map(([k]) => `<td class="num">${D.models[k].index[i] ?? "–"}</td>`).join("")}${ECON.map(k => `<td class="num">${D.econ[k][i] ?? "–"}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+}
+renderAll();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+new MutationObserver(renderAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+</script>
