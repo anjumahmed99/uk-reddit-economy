@@ -169,8 +169,9 @@ function lineChart(host, { x, series, xFmt = v => v, shade, zeroLine, yFmt = v =
     g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" ${s.dash ? 'stroke-dasharray="5 4"' : ""}/>`;
   });
   g += `<line class="xh" y1="${m.t}" y2="${H - m.b}" stroke="${css("--ink-3")}" stroke-width="1" visibility="hidden"/><g class="dots"></g>`;
-  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": series.map(s => s.name).join(", ") }, g);
-  host.appendChild(svg);
+  // Parse via innerHTML so the markup lands in the SVG namespace (createElement("svg") would make an inert HTML element)
+  host.insertAdjacentHTML("beforeend", `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${series.map(s => s.name).join(", ")}">${g}</svg>`);
+  const svg = host.lastElementChild;
   const tip = el("div", { class: "tip", hidden: "" }); host.appendChild(tip);
   const xh = svg.querySelector(".xh"), dots = svg.querySelector(".dots");
   svg.addEventListener("pointermove", e => {
